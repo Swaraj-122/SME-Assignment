@@ -1,0 +1,166 @@
+#include "../../header/Main/GameService.h"
+
+int main()
+{
+    using namespace Main;
+
+    GameService* game_service = new GameService();
+    game_service->ignite();
+
+    while (game_service->isRunning())
+    {
+        game_service->update();
+        game_service->render();
+    }
+
+    delete game_service; // Free allocated memory  
+    return 0;
+}
+
+//GameServices.h
+#pragma once
+#include <SFML/Graphics.hpp>
+#include "../../header/Global/ServiceLocator.h"
+
+namespace Main
+{
+	enum class GameState
+	{
+		BOOT,
+		SPLASH_SCREEN,
+		MAIN_MENU,
+		INSTRUCTIONS,
+		GAMEPLAY,
+		CREDITS,
+	};
+
+	class GameService
+	{
+	private:
+		static GameState current_state;
+
+		Global::ServiceLocator* service_locator;
+		sf::RenderWindow* game_window;
+
+		void initialize();
+		void initializeVariables();
+		void showSplashScreen();
+		void destroy();
+
+	public:
+		GameService();
+		virtual ~GameService();
+
+		void ignite();
+		void update();
+		void render();
+		bool isRunning();
+
+		static void setGameState(GameState new_state);
+		static GameState getGameState();
+	};
+}
+
+
+// Inside GameService class declaration
+class GameService
+{
+private:
+    // Other members...
+
+    std::vector<Bullet> bullets; // List of active bullets
+
+    // Methods for player ship and enemy ship firing
+    void playerShipFire();
+    void enemyShipFire(EnemyShip& enemyShip);
+
+    // Method to add a bullet of a specific type to the list of active bullets
+    void addBullet(const Bullet& bullet);
+
+public:
+    // Other methods...
+
+    // Method to update bullet positions and check collisions
+    void updateBullets();
+};
+
+// Implementation of GameService methods
+void GameService::playerShipFire()
+{
+    // Detect player ship firing input (e.g., keyboard key press) with delay
+    static int fireDelay = 0;
+    if (/* Player ship firing input detected */ && fireDelay <= 0)
+    {
+        // Create a simple bullet object at the player ship's position
+        Bullet bullet(/* Type: SimpleBullet */, playerShip.getPosition(), /* Set bullet direction */);
+
+        // Add the bullet to the list of active bullets
+        addBullet(bullet);
+
+        // Apply firing delay
+        fireDelay = /* Set firing delay */;
+    }
+    else if (fireDelay > 0)
+    {
+        fireDelay--;
+    }
+}
+
+void GameService::enemyShipFire(EnemyShip& enemyShip)
+{
+    // Logic to determine if the enemy ship should fire with delay
+    static int fireDelay = 0;
+    if (/* Enemy ship should fire */ && fireDelay <= 0)
+    {
+        // Create a bullet object based on the enemy ship type
+        Bullet bullet;
+        switch (enemyShip.getType())
+        {
+            case EnemyShipType::SubZero:
+                // Create Frost Beam bullet
+                // bullet = FrostBeamBullet(enemyShip.getPosition(), /* Set bullet direction */);
+                break;
+            case EnemyShipType::ThunderSnake:
+                // Create Torpedo bullet
+                // bullet = TorpedoBullet(enemyShip.getPosition(), /* Set bullet direction */);
+                break;
+            case EnemyShipType::Zapper:
+                // Create Locked Missile bullet
+                // bullet = LockedMissileBullet(enemyShip.getPosition(), /* Set bullet direction */);
+                break;
+            default:
+                // Create Simple Bullet as default
+                // bullet = SimpleBullet(enemyShip.getPosition(), /* Set bullet direction */);
+                break;
+        }
+
+        // Add the bullet to the list of active bullets
+        addBullet(bullet);
+
+        // Apply firing delay
+        fireDelay = /* Set firing delay */;
+    }
+    else if (fireDelay > 0)
+    {
+        fireDelay--;
+    }
+}
+
+void GameService::addBullet(const Bullet& bullet)
+{
+    // Add the bullet to the list of active bullets
+    bullets.push_back(bullet);
+}
+
+void GameService::updateBullets()
+{
+    // Update positions of all active bullets
+    for (auto& bullet : bullets)
+    {
+        bullet.update(); // Update bullet position
+        // Check for collisions with player ship, enemy ships, barriers, powerups, or boundaries
+        // Handle collisions accordingly
+    }
+}
+
+
